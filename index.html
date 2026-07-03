@@ -3,690 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>股票技术指标分析工具</title>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<title>AI Quant - 量化分析项目 [前复权]</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh}
-/* Header */
-header{background:#161b22;border-bottom:1px solid #30363d;padding:16px 24px;position:sticky;top:0;z-index:100}
-.header-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-header h1{font-size:20px;font-weight:600;color:#58a6ff;white-space:nowrap}
-.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-left:auto}
-.controls input[type=text],.controls input[type=date]{background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:7px 12px;border-radius:6px;font-size:13px;outline:none;transition:border-color .2s}
-.controls input[type=text]:focus,.controls input[type=date]:focus{border-color:#58a6ff}
-.controls input[type=text]{width:130px}
-.btn{background:#238636;color:#fff;border:none;padding:7px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:background .2s}
-.btn:hover{background:#2ea043}
-.btn-secondary{background:#21262d;border:1px solid #30363d;color:#c9d1d9}
-.btn-secondary:hover{background:#30363d}
-.quick-select{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.quick-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:4px 12px;border-radius:12px;cursor:pointer;font-size:12px;transition:all .2s}
-.quick-btn:hover{border-color:#58a6ff;color:#58a6ff}
-.quick-btn.active{background:#1f6feb;border-color:#1f6feb;color:#fff}
-/* Info Bar */
-.info-bar{background:#161b22;border-bottom:1px solid #30363d;padding:10px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-.info-item{display:flex;align-items:center;gap:6px}
-.info-label{font-size:12px;color:#8b949e}
-.info-value{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
-.up{color:#f85149}.down{color:#3fb950}.neutral{color:#8b949e}
-/* Main Content */
-main{padding:16px 24px 40px;max-width:1600px;margin:0 auto}
-.chart-section{background:#161b22;border:1px solid #30363d;border-radius:8px;margin-bottom:16px;overflow:hidden}
-.chart-title-bar{padding:10px 16px;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between}
-.chart-title{font-size:14px;font-weight:600;color:#c9d1d9}
-.chart-title .num{color:#58a6ff;margin-right:6px}
-.chart-desc{font-size:12px;color:#8b949e}
-/* Indicators Grid */
-.indicators-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:1100px){.indicators-grid{grid-template-columns:1fr}}
-.indicator-panel{background:#161b22;border:1px solid #30363d;border-radius:8px;overflow:hidden}
-.panel-header{padding:10px 16px;border-bottom:1px solid #21262d}
-.panel-title{font-size:14px;font-weight:600;color:#c9d1d9;margin-bottom:8px}
-.panel-title .num{color:#58a6ff;margin-right:6px}
-.param-row{display:flex;gap:14px;flex-wrap:wrap}
-.param-control{display:flex;align-items:center;gap:6px}
-.param-control label{font-size:11px;color:#8b949e;letter-spacing:.5px;min-width:55px}
-.param-control input[type=range]{width:90px;height:4px;-webkit-appearance:none;appearance:none;background:#30363d;border-radius:2px;outline:none}
-.param-control input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#58a6ff;cursor:pointer;border:2px solid #0d1117}
-.param-control input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#58a6ff;cursor:pointer;border:2px solid #0d1117}
-.param-val{font-size:12px;font-weight:600;color:#58a6ff;min-width:24px;text-align:center;font-variant-numeric:tabular-nums}
-.reset-btn{background:none;border:none;color:#8b949e;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px;transition:color .2s}
-.reset-btn:hover{color:#f85149}
-/* Chart containers */
-.chart-box{width:100%}
-#klineChart{height:420px}
-#macdChart,#rsiChart,#kdjChart,#bollChart{height:300px}
-/* Loading & Error */
-.loading-overlay{position:fixed;inset:0;background:rgba(13,17,23,.8);display:none;align-items:center;justify-content:center;z-index:200}
-.loading-overlay.active{display:flex}
-.spinner{width:40px;height:40px;border:3px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.error-msg{background:#3d1218;border:1px solid #f85149;border-radius:8px;padding:12px 20px;color:#f85149;font-size:14px;margin:16px 24px;display:none}
-.error-msg.show{display:block}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh}
+/* Hero */
+.hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#1a1a3e 100%);padding:40px 24px 30px;text-align:center;border-bottom:1px solid #30363d}
+.hero h1{font-size:28px;font-weight:700;color:#58a6ff;margin-bottom:8px}
+.hero p{font-size:14px;color:#8b949e;max-width:680px;margin:0 auto;line-height:1.6}
+.badge{display:inline-block;background:#1f6feb;color:#fff;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-top:10px}
+/* Container */
+.container{max-width:1200px;margin:0 auto;padding:24px}
+/* Section */
+.section{margin-bottom:36px}
+.section-title{font-size:18px;font-weight:600;color:#c9d1d9;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:8px}
+.section-title .icon{font-size:22px}
+.section-title .count{font-size:12px;color:#484f58;font-weight:400;margin-left:auto}
+/* Card Grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;transition:all .2s;text-decoration:none;display:block}
+.card:hover{border-color:#58a6ff;transform:translateY(-2px);box-shadow:0 4px 20px rgba(88,166,255,0.15)}
+.card-head{padding:16px 18px 10px}
+.card-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:.5px}
+.tag-tool{background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb44}
+.tag-chart{background:#23863622;color:#3fb950;border:1px solid #23863644}
+.tag-report{background:#bc8cff22;color:#bc8cff;border:1px solid #bc8cff44}
+.tag-data{background:#e3b34122;color:#e3b341;border:1px solid #e3b34144}
+.tag-code{background:#f0883e22;color:#f0883e;border:1px solid #f0883e44}
+.card-title{font-size:15px;font-weight:600;color:#c9d1d9;margin-bottom:4px}
+.card-desc{font-size:13px;color:#8b949e;line-height:1.5}
+.card-foot{padding:8px 18px 14px;display:flex;align-items:center;gap:12px}
+.card-meta{font-size:11px;color:#484f58}
+.card-arrow{margin-left:auto;color:#30363d;font-size:16px;transition:color .2s}
+.card:hover .card-arrow{color:#58a6ff}
+/* Highlight card (tool) */
+.card.highlight{border-color:#1f6feb44;background:linear-gradient(135deg,#161b22 0%,#0d1520 100%)}
+.card.highlight:hover{border-color:#58a6ff;box-shadow:0 4px 24px rgba(88,166,255,0.2)}
+/* Stats bar */
+.stats-bar{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:16px}
+.stat{text-align:center}
+.stat .num{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .lbl{font-size:12px;color:#484f58;margin-top:2px}
+.up{color:#f85149}.down{color:#3fb950}
 /* Footer */
-footer{text-align:center;padding:20px;color:#484f58;font-size:12px;border-top:1px solid #21262d}
+footer{text-align:center;padding:24px;color:#484f58;font-size:12px;border-top:1px solid #21262d;margin-top:20px}
+footer a{color:#58a6ff;text-decoration:none}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-row">
-    <h1>股票技术指标分析工具</h1>
-    <div class="controls">
-      <input type="text" id="stockInput" placeholder="股票代码 如 300251" value="300251">
-      <input type="date" id="startDate">
-      <input type="date" id="endDate">
-      <button class="btn" id="loadBtn">加载数据</button>
-    </div>
+<div class="hero">
+  <h1>AI Quant · 光线传媒量化分析项目</h1>
+  <p>基于 Tushare 前(qfq)日线数据，涵盖交互式技术指标工具、K线看板、收盘价趋势、8项技术指标分析报告、Jupyter Notebook 及原始数据集。</p>
+  <span class="badge">前复权 · 2025-07-01 ~ 2026-07-03 · 245 个交易日</span>
+  <div class="stats-bar">
+    <div class="stat"><div class="num down">-40.15%</div><div class="lbl">区间涨跌</div></div>
+    <div class="stat"><div class="num">¥11.67</div><div class="lbl">最新收盘</div></div>
+    <div class="stat"><div class="num up">¥29.53</div><div class="lbl">区间最高</div></div>
+    <div class="stat"><div class="num down">¥10.60</div><div class="lbl">区间最低</div></div>
   </div>
-  <div class="quick-select" id="quickSelect"></div>
-</header>
-
-<div class="info-bar" id="infoBar">
-  <div class="info-item"><span class="info-label">股票</span><span class="info-value" id="iName">--</span></div>
-  <div class="info-item"><span class="info-label">最新价</span><span class="info-value" id="iPrice">--</span></div>
-  <div class="info-item"><span class="info-label">涨跌幅</span><span class="info-value" id="iChange">--</span></div>
-  <div class="info-item"><span class="info-label">数据量</span><span class="info-value neutral" id="iCount">--</span></div>
-  <div class="info-item"><span class="info-label">区间最高</span><span class="info-value up" id="iHigh">--</span></div>
-  <div class="info-item"><span class="info-label">区间最低</span><span class="info-value down" id="iLow">--</span></div>
 </div>
 
-<div class="error-msg" id="errorMsg"></div>
+<div class="container">
 
-<main>
-  <!-- K-line Chart -->
-  <section class="chart-section">
-    <div class="chart-title-bar">
-      <span class="chart-title"><span class="num">图1</span>K线图（含成交量与均线）</span>
-      <span class="chart-desc">前复权日K线 · MA5/MA10/MA20/MA60 · 成交量（涨红跌绿）</span>
+  <!-- 交互工具 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔧</span> 交互式分析工具<span class="count">1 项</span></div>
+    <div class="card-grid">
+      <a class="card highlight" href="stock_indicator_tool.html">
+        <div class="card-head">
+          <span class="card-tag tag-tool">实时交互</span>
+          <div class="card-title">股票技术指标分析工具</div>
+          <div class="card-desc">选股 + 前复权K线获取 + 4项技术指标(MACD/RSI/KDJ/布林带)参数可调实时重绘。支持代码输入、快选按钮、滑块调参、缩放联动。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">ECharts · 东方财富API</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
     </div>
-    <div id="klineChart" class="chart-box"></div>
-  </section>
-
-  <!-- 2x2 Indicator Grid -->
-  <div class="indicators-grid">
-    <!-- MACD -->
-    <section class="indicator-panel">
-      <div class="panel-header">
-        <div class="panel-title"><span class="num">图2</span>MACD 指标（指数平滑异同移动平均线）</div>
-        <div class="param-row">
-          <div class="param-control"><label>快线</label><input type="range" min="2" max="30" value="12" data-ind="macd" data-key="fast"><span class="param-val" id="macd-fast-val">12</span></div>
-          <div class="param-control"><label>慢线</label><input type="range" min="5" max="50" value="26" data-ind="macd" data-key="slow"><span class="param-val" id="macd-slow-val">26</span></div>
-          <div class="param-control"><label>信号</label><input type="range" min="3" max="20" value="9" data-ind="macd" data-key="signal"><span class="param-val" id="macd-signal-val">9</span></div>
-          <button class="reset-btn" data-ind="macd">重置</button>
-        </div>
-      </div>
-      <div id="macdChart" class="chart-box"></div>
-    </section>
-
-    <!-- RSI -->
-    <section class="indicator-panel">
-      <div class="panel-header">
-        <div class="panel-title"><span class="num">图3</span>RSI 指标（相对强弱指标）</div>
-        <div class="param-row">
-          <div class="param-control"><label>RSI1</label><input type="range" min="2" max="30" value="6" data-ind="rsi" data-key="p1"><span class="param-val" id="rsi-p1-val">6</span></div>
-          <div class="param-control"><label>RSI2</label><input type="range" min="5" max="40" value="12" data-ind="rsi" data-key="p2"><span class="param-val" id="rsi-p2-val">12</span></div>
-          <div class="param-control"><label>RSI3</label><input type="range" min="10" max="50" value="24" data-ind="rsi" data-key="p3"><span class="param-val" id="rsi-p3-val">24</span></div>
-          <button class="reset-btn" data-ind="rsi">重置</button>
-        </div>
-      </div>
-      <div id="rsiChart" class="chart-box"></div>
-    </section>
-
-    <!-- KDJ -->
-    <section class="indicator-panel">
-      <div class="panel-header">
-        <div class="panel-title"><span class="num">图4</span>KDJ 指标（随机指标）</div>
-        <div class="param-row">
-          <div class="param-control"><label>周期N</label><input type="range" min="3" max="30" value="9" data-ind="kdj" data-key="n"><span class="param-val" id="kdj-n-val">9</span></div>
-          <div class="param-control"><label>M1</label><input type="range" min="1" max="10" value="3" data-ind="kdj" data-key="m1"><span class="param-val" id="kdj-m1-val">3</span></div>
-          <div class="param-control"><label>M2</label><input type="range" min="1" max="10" value="3" data-ind="kdj" data-key="m2"><span class="param-val" id="kdj-m2-val">3</span></div>
-          <button class="reset-btn" data-ind="kdj">重置</button>
-        </div>
-      </div>
-      <div id="kdjChart" class="chart-box"></div>
-    </section>
-
-    <!-- Bollinger Bands -->
-    <section class="indicator-panel">
-      <div class="panel-header">
-        <div class="panel-title"><span class="num">图5</span>布林带（Bollinger Bands）</div>
-        <div class="param-row">
-          <div class="param-control"><label>周期</label><input type="range" min="5" max="50" value="20" data-ind="boll" data-key="period"><span class="param-val" id="boll-period-val">20</span></div>
-          <div class="param-control"><label>标准差</label><input type="range" min="1" max="4" step="0.5" value="2" data-ind="boll" data-key="std"><span class="param-val" id="boll-std-val">2</span></div>
-          <button class="reset-btn" data-ind="boll">重置</button>
-        </div>
-      </div>
-      <div id="bollChart" class="chart-box"></div>
-    </section>
   </div>
-</main>
+
+  <!-- 交互式看板 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📊</span> 交互式看板<span class="count">2 项</span></div>
+    <div class="card-grid">
+      <a class="card" href="光线传媒_看板.html">
+        <div class="card-head">
+          <span class="card-tag tag-chart">K线</span>
+          <div class="card-title">K线看板（前复权）</div>
+          <div class="card-desc">日K蜡烛图 + MA5/10/20/60 均线 + 成交量柱状图。支持滚轮缩放、拖拽平移、十字光标联动。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">245 条记录 · ECharts</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+      <a class="card" href="光线传媒_收盘价趋势图.html">
+        <div class="card-head">
+          <span class="card-tag tag-chart">趋势</span>
+          <div class="card-title">收盘价趋势图（前复权）</div>
+          <div class="card-desc">每日收盘价红色折线 + MA20 黄色均线。带半透明区域填充、缩放、滑块拖拽。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">含区间极值标注 · ECharts</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 分析报告 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📋</span> 分析报告<span class="count">1 项</span></div>
+    <div class="card-grid">
+      <a class="card" href="光线传媒_分析报告.html">
+        <div class="card-head">
+          <span class="card-tag tag-report">8张图表</span>
+          <div class="card-title">股票分析报告（前复权）</div>
+          <div class="card-desc">8张技术指标图表：价格统计摘要 + K线/均线 + 成交量 + MACD + RSI + KDJ + 布林带 + 涨跌幅分布。每图含标号、标题和解读文字。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">matplotlib · 含解读</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 数据与代码 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🗂️</span> 数据与代码<span class="count">5 项</span></div>
+    <div class="card-grid">
+      <a class="card" href="光线传媒_300251_daily.csv">
+        <div class="card-head">
+          <span class="card-tag tag-data">CSV</span>
+          <div class="card-title">日线数据 CSV（前复权）</div>
+          <div class="card-desc">245条记录，含日期/开/高/低/收/成交量/成交额/涨跌幅/复权因子。UTF-8编码。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">Excel / Pandas 可直接打开</span>
+          <span class="card-arrow">↓</span>
+        </div>
+      </a>
+      <a class="card" href="光线传媒_300251_daily.json">
+        <div class="card-head">
+          <span class="card-tag tag-data">JSON</span>
+          <div class="card-title">日线数据 JSON（前复权）</div>
+          <div class="card-desc">前复权日线数据，含完整 OHLCV 字段和复权因子。供程序调用。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">245 条 · 含 adj_factor</span>
+          <span class="card-arrow">↓</span>
+        </div>
+      </a>
+      <a class="card" href="光线传媒_数据分析.ipynb">
+        <div class="card-head">
+          <span class="card-tag tag-code">Notebook</span>
+          <div class="card-title">数据分析 Notebook</div>
+          <div class="card-desc">21个Cell：Tushare API获取 → 数据清洗 → 收盘价图 → K线图 → 成交量 → 统计分析 → CSV导出。完整可复现。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">Python · matplotlib · mplfinance</span>
+          <span class="card-arrow">↓</span>
+        </div>
+      </a>
+      <a class="card" href="光线传媒_技术指标分析.ipynb">
+        <div class="card-head">
+          <span class="card-tag tag-code">Notebook</span>
+          <div class="card-title">技术指标分析 Notebook</div>
+          <div class="card-desc">技术指标计算与可视化：MACD/RSI/KDJ/布林带/ATR 的原理讲解 + Python 实现 + 图表绘制。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">Python · pandas · matplotlib</span>
+          <span class="card-arrow">↓</span>
+        </div>
+      </a>
+      <a class="card" href="光线传媒_300251_分析.csv">
+        <div class="card-head">
+          <span class="card-tag tag-data">CSV</span>
+          <div class="card-title">分析数据 CSV</div>
+          <div class="card-desc">含技术指标计算结果的扩展数据集：MA/EMA/MACD/RSI/KDJ/布林带等指标列。</div>
+        </div>
+        <div class="card-foot">
+          <span class="card-meta">含技术指标列</span>
+          <span class="card-arrow">↓</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</div>
 
 <footer>
-  数据来源：东方财富 · 前复权日线 · 技术指标实时计算 | 股票技术指标分析工具
+  数据来源：Tushare (前复权) · <a href="https://github.com/Fisher-code829/Ai-Quant.github.io" target="_blank">GitHub 仓库</a> · 仅供参考，不构成投资建议
 </footer>
 
-<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
-
-<script>
-// ===================== 全局状态 =====================
-var stockData = null; // {dates, opens, closes, highs, lows, volumes, name, code}
-var charts = {};
-var params = {
-  macd: { fast:12, slow:26, signal:9 },
-  rsi:  { p1:6, p2:12, p3:24 },
-  kdj:  { n:9, m1:3, m2:3 },
-  boll: { period:20, std:2 }
-};
-var defaults = JSON.parse(JSON.stringify(params));
-
-// 快选股票
-var quickStocks = [
-  {code:'300251', name:'光线传媒'},
-  {code:'600519', name:'贵州茅台'},
-  {code:'688981', name:'中芯国际'},
-  {code:'300750', name:'宁德时代'},
-  {code:'002594', name:'比亚迪'},
-  {code:'601318', name:'中国平安'},
-  {code:'600036', name:'招商银行'},
-  {code:'000858', name:'五粮液'}
-];
-
-// ===================== 工具函数 =====================
-function debounce(fn, delay){
-  var timer;
-  return function(){
-    var ctx=this, args=arguments;
-    clearTimeout(timer);
-    timer=setTimeout(function(){fn.apply(ctx,args)}, delay);
-  };
-}
-
-// 根据股票代码判断市场 (0=深, 1=沪)
-function getMarket(code){
-  if(!code) return 0;
-  var c = code.charAt(0);
-  if(c==='6') return 1; // 6开头=沪市
-  if(code.substring(0,3)==='688') return 1; // 科创板
-  return 0; // 0/3开头=深市
-}
-
-// ===================== 数据获取 =====================
-async function fetchStockData(code, startDate, endDate){
-  var market = getMarket(code);
-  var secid = market + '.' + code;
-  var url = 'https://push2his.eastmoney.com/api/qt/stock/kline/get'
-    + '?secid=' + secid
-    + '&fields1=f1,f2,f3,f4,f5,f6'
-    + '&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61'
-    + '&klt=101&fqt=1'
-    + '&beg=' + startDate.replace(/-/g,'')
-    + '&end=' + endDate.replace(/-/g,'')
-    + '&lmt=1000';
-
-  var resp = await fetch(url);
-  var json = await resp.json();
-  if(!json.data || !json.data.klines || json.data.klines.length===0){
-    throw new Error('未获取到数据，请检查股票代码是否正确');
-  }
-
-  var klines = json.data.klines;
-  var dates=[], opens=[], closes=[], highs=[], lows=[], volumes=[];
-
-  for(var i=0; i<klines.length; i++){
-    var parts = klines[i].split(',');
-    // f51=date, f52=open, f53=close, f54=high, f55=low, f56=volume
-    dates.push(parts[0]);
-    opens.push(parseFloat(parts[1]));
-    closes.push(parseFloat(parts[2]));
-    highs.push(parseFloat(parts[3]));
-    lows.push(parseFloat(parts[4]));
-    volumes.push(parseFloat(parts[5]));
-  }
-
-  return {
-    dates: dates, opens: opens, closes: closes,
-    highs: highs, lows: lows, volumes: volumes,
-    name: json.data.name || code, code: code
-  };
-}
-
-// ===================== 技术指标计算 =====================
-// EMA 指数移动平均
-function calcEMA(data, period){
-  var ema = new Array(data.length);
-  var k = 2 / (period + 1);
-  ema[0] = data[0];
-  for(var i=1; i<data.length; i++){
-    ema[i] = data[i] * k + ema[i-1] * (1-k);
-  }
-  return ema;
-}
-
-// SMA 简单移动平均
-function calcSMA(data, period){
-  var sma = new Array(data.length).fill(null);
-  for(var i=period-1; i<data.length; i++){
-    var sum = 0;
-    for(var j=i-period+1; j<=i; j++) sum += data[j];
-    sma[i] = sum / period;
-  }
-  return sma;
-}
-
-// MACD
-function calcMACD(closes, fast, slow, signal){
-  var emaFast = calcEMA(closes, fast);
-  var emaSlow = calcEMA(closes, slow);
-  var dif = new Array(closes.length);
-  for(var i=0; i<closes.length; i++) dif[i] = emaFast[i] - emaSlow[i];
-  var dea = calcEMA(dif, signal);
-  var macd = new Array(closes.length);
-  for(var i=0; i<closes.length; i++) macd[i] = (dif[i] - dea[i]) * 2;
-  return { dif: dif, dea: dea, macd: macd };
-}
-
-// RSI
-function calcRSI(closes, period){
-  var rsi = new Array(closes.length).fill(null);
-  if(closes.length < period+1) return rsi;
-  var avgGain = 0, avgLoss = 0;
-  for(var i=1; i<=period; i++){
-    var ch = closes[i] - closes[i-1];
-    if(ch>0) avgGain += ch; else avgLoss += Math.abs(ch);
-  }
-  avgGain /= period; avgLoss /= period;
-  rsi[period] = avgLoss===0 ? 100 : 100 - 100/(1 + avgGain/avgLoss);
-  for(var i=period+1; i<closes.length; i++){
-    var ch = closes[i] - closes[i-1];
-    var gain = ch>0 ? ch : 0;
-    var loss = ch<0 ? Math.abs(ch) : 0;
-    avgGain = (avgGain*(period-1) + gain) / period;
-    avgLoss = (avgLoss*(period-1) + loss) / period;
-    rsi[i] = avgLoss===0 ? 100 : 100 - 100/(1 + avgGain/avgLoss);
-  }
-  return rsi;
-}
-
-// KDJ
-function calcKDJ(highs, lows, closes, n, m1, m2){
-  var len = closes.length;
-  var k = new Array(len).fill(null);
-  var d = new Array(len).fill(null);
-  var j = new Array(len).fill(null);
-  var prevK = 50, prevD = 50;
-  for(var i=0; i<len; i++){
-    if(i < n-1) continue;
-    var hh = -Infinity, ll = Infinity;
-    for(var l=i-n+1; l<=i; l++){
-      if(highs[l]>hh) hh = highs[l];
-      if(lows[l]<ll) ll = lows[l];
-    }
-    var rsv = hh===ll ? 0 : (closes[i]-ll)/(hh-ll)*100;
-    k[i] = (m1-1)/m1 * prevK + 1/m1 * rsv;
-    d[i] = (m2-1)/m2 * prevD + 1/m2 * k[i];
-    j[i] = 3 * k[i] - 2 * d[i];
-    prevK = k[i]; prevD = d[i];
-  }
-  return { k:k, d:d, j:j };
-}
-
-// Bollinger Bands
-function calcBoll(closes, period, stdMult){
-  var len = closes.length;
-  var upper = new Array(len).fill(null);
-  var middle = new Array(len).fill(null);
-  var lower = new Array(len).fill(null);
-  for(var i=period-1; i<len; i++){
-    var sum = 0;
-    for(var x=i-period+1; x<=i; x++) sum += closes[x];
-    var ma = sum / period;
-    var variance = 0;
-    for(var x=i-period+1; x<=i; x++) variance += Math.pow(closes[x]-ma, 2);
-    var std = Math.sqrt(variance / period);
-    middle[i] = ma;
-    upper[i] = ma + stdMult * std;
-    lower[i] = ma - stdMult * std;
-  }
-  return { upper:upper, middle:middle, lower:lower };
-}
-
-// ===================== 图表渲染 =====================
-// 公共色值
-var C = {
-  up:'#f85149', down:'#3fb950', bg:'#161b22', text:'#c9d1d9',
-  grid:'#21262d', axis:'#484f58', blue:'#58a6ff', yellow:'#e3b341',
-  purple:'#bc8cff', orange:'#f0883e', cyan:'#39d0d8'
-};
-
-function initCharts(){
-  // K-line
-  charts.kline = echarts.init(document.getElementById('klineChart'), 'dark');
-  charts.macd  = echarts.init(document.getElementById('macdChart'), 'dark');
-  charts.rsi   = echarts.init(document.getElementById('rsiChart'), 'dark');
-  charts.kdj   = echarts.init(document.getElementById('kdjChart'), 'dark');
-  charts.boll  = echarts.init(document.getElementById('bollChart'), 'dark');
-
-  // 设置 group 用于 tooltip 联动
-  for(var key in charts) charts[key].group = 'stock';
-
-  // dataZoom 联动
-  var allCharts = [charts.kline, charts.macd, charts.rsi, charts.kdj, charts.boll];
-  allCharts.forEach(function(c){
-    c.on('dataZoom', function(e){
-      var opt = c.getOption();
-      if(opt.dataZoom && opt.dataZoom.length>0){
-        var dz = opt.dataZoom[0];
-        allCharts.forEach(function(other){
-          if(other !== c){
-            other.dispatchAction({ type:'dataZoom', start:dz.start, end:dz.end });
-          }
-        });
-      }
-    });
-  });
-
-  window.addEventListener('resize', function(){
-    allCharts.forEach(function(c){ c.resize(); });
-  });
-}
-
-function renderKLine(){
-  if(!stockData) return;
-  var d = stockData;
-  // OHLC for candlestick
-  var ohlc = [];
-  for(var i=0; i<d.dates.length; i++){
-    ohlc.push([d.opens[i], d.closes[i], d.lows[i], d.highs[i]]);
-  }
-  // MA lines
-  var ma5  = calcSMA(d.closes, 5);
-  var ma10 = calcSMA(d.closes, 10);
-  var ma20 = calcSMA(d.closes, 20);
-  var ma60 = calcSMA(d.closes, 60);
-  // Volume colored
-  var volData = [];
-  for(var i=0; i<d.volumes.length; i++){
-    volData.push({ value: d.volumes[i], itemStyle:{ color: d.closes[i]>=d.opens[i] ? C.up+'99' : C.down+'99' } });
-  }
-
-  charts.kline.setOption({
-    backgroundColor: 'transparent',
-    tooltip: { trigger:'axis', axisPointer:{ type:'cross' }, backgroundColor:C.bg, borderColor:C.grid, textStyle:{color:C.text} },
-    legend: { data:['MA5','MA10','MA20','MA60'], top:6, textStyle:{color:C.axis,fontSize:11}, itemWidth:14,itemHeight:2 },
-    grid: [
-      { left:'7%', right:'3%', top:'12%', height:'52%' },
-      { left:'7%', right:'3%', top:'70%', height:'20%' }
-    ],
-    xAxis: [
-      { type:'category', data:d.dates, gridIndex:0, axisLine:{lineStyle:{color:C.grid}}, axisLabel:{color:C.axis,fontSize:10}, splitLine:{show:false} },
-      { type:'category', data:d.dates, gridIndex:1, axisLine:{lineStyle:{color:C.grid}}, axisLabel:{show:false}, splitLine:{show:false} }
-    ],
-    yAxis: [
-      { scale:true, gridIndex:0, axisLabel:{color:C.axis,fontSize:10}, splitLine:{lineStyle:{color:C.grid}} },
-      { gridIndex:1, axisLabel:{show:false}, splitLine:{show:false} }
-    ],
-    dataZoom: [
-      { type:'inside', xAxisIndex:[0,1], start:0, end:100 },
-      { type:'slider', xAxisIndex:[0,1], bottom:4, height:18, borderColor:C.grid, fillerColor:'rgba(88,166,255,0.1)', textStyle:{color:C.axis,fontSize:10} }
-    ],
-    series: [
-      { name:'K线', type:'candlestick', data:ohlc, itemStyle:{ color:C.up, color0:C.down, borderColor:C.up, borderColor0:C.down } },
-      { name:'MA5', type:'line', data:ma5, smooth:true, symbol:'none', lineStyle:{width:1,color:C.yellow} },
-      { name:'MA10', type:'line', data:ma10, smooth:true, symbol:'none', lineStyle:{width:1,color:C.purple} },
-      { name:'MA20', type:'line', data:ma20, smooth:true, symbol:'none', lineStyle:{width:1,color:C.blue} },
-      { name:'MA60', type:'line', data:ma60, smooth:true, symbol:'none', lineStyle:{width:1,color:C.orange} },
-      { name:'成交量', type:'bar', xAxisIndex:1, yAxisIndex:1, data:volData }
-    ]
-  }, true);
-}
-
-function renderMACD(){
-  if(!stockData) return;
-  var p = params.macd;
-  var r = calcMACD(stockData.closes, p.fast, p.slow, p.signal);
-  var macdData = r.macd.map(function(v,i){
-    return { value:v, itemStyle:{ color: v>=0 ? C.up+'cc' : C.down+'cc' } };
-  });
-
-  charts.macd.setOption({
-    backgroundColor:'transparent',
-    tooltip:{ trigger:'axis', axisPointer:{type:'cross'}, backgroundColor:C.bg, borderColor:C.grid, textStyle:{color:C.text} },
-    legend:{ data:['DIF','DEA'], top:4, textStyle:{color:C.axis,fontSize:10}, itemWidth:12,itemHeight:2 },
-    grid:{ left:'8%', right:'3%', top:'14%', bottom:'18%' },
-    xAxis:{ type:'category', data:stockData.dates, axisLine:{lineStyle:{color:C.grid}}, axisLabel:{color:C.axis,fontSize:10}, splitLine:{show:false} },
-    yAxis:{ scale:true, axisLabel:{color:C.axis,fontSize:10}, splitLine:{lineStyle:{color:C.grid}} },
-    dataZoom:[ { type:'inside', start:0, end:100 }, { type:'slider', bottom:2, height:14, borderColor:C.grid, fillerColor:'rgba(88,166,255,0.1)', textStyle:{color:C.axis,fontSize:9} } ],
-    series:[
-      { name:'MACD', type:'bar', data:macdData },
-      { name:'DIF', type:'line', data:r.dif, symbol:'none', lineStyle:{width:1.5,color:C.blue} },
-      { name:'DEA', type:'line', data:r.dea, symbol:'none', lineStyle:{width:1.5,color:C.yellow} }
-    ]
-  }, true);
-}
-
-function renderRSI(){
-  if(!stockData) return;
-  var p = params.rsi;
-  var r1 = calcRSI(stockData.closes, p.p1);
-  var r2 = calcRSI(stockData.closes, p.p2);
-  var r3 = calcRSI(stockData.closes, p.p3);
-
-  charts.rsi.setOption({
-    backgroundColor:'transparent',
-    tooltip:{ trigger:'axis', axisPointer:{type:'cross'}, backgroundColor:C.bg, borderColor:C.grid, textStyle:{color:C.text} },
-    legend:{ data:['RSI'+p.p1,'RSI'+p.p2,'RSI'+p.p3], top:4, textStyle:{color:C.axis,fontSize:10}, itemWidth:12,itemHeight:2 },
-    grid:{ left:'8%', right:'3%', top:'14%', bottom:'18%' },
-    xAxis:{ type:'category', data:stockData.dates, axisLine:{lineStyle:{color:C.grid}}, axisLabel:{color:C.axis,fontSize:10}, splitLine:{show:false} },
-    yAxis:{ min:0, max:100, axisLabel:{color:C.axis,fontSize:10}, splitLine:{lineStyle:{color:C.grid}} },
-    dataZoom:[ { type:'inside', start:0, end:100 }, { type:'slider', bottom:2, height:14, borderColor:C.grid, fillerColor:'rgba(88,166,255,0.1)', textStyle:{color:C.axis,fontSize:9} } ],
-    series:[
-      { name:'RSI'+p.p1, type:'line', data:r1, symbol:'none', lineStyle:{width:1.5,color:C.blue} },
-      { name:'RSI'+p.p2, type:'line', data:r2, symbol:'none', lineStyle:{width:1.5,color:C.yellow} },
-      { name:'RSI'+p.p3, type:'line', data:r3, symbol:'none', lineStyle:{width:1.5,color:C.purple} },
-      { type:'line', data:[], markLine:{ silent:true, symbol:'none', lineStyle:{type:'dashed'}, data:[
-        { yAxis:70, lineStyle:{color:C.up+'88'}, label:{color:C.up,fontSize:10,formatter:'70 超买'} },
-        { yAxis:30, lineStyle:{color:C.down+'88'}, label:{color:C.down,fontSize:10,formatter:'30 超卖'} },
-        { yAxis:50, lineStyle:{color:C.axis+'66'}, label:{color:C.axis,fontSize:10,formatter:'50'} }
-      ] } }
-    ]
-  }, true);
-}
-
-function renderKDJ(){
-  if(!stockData) return;
-  var p = params.kdj;
-  var r = calcKDJ(stockData.highs, stockData.lows, stockData.closes, p.n, p.m1, p.m2);
-
-  charts.kdj.setOption({
-    backgroundColor:'transparent',
-    tooltip:{ trigger:'axis', axisPointer:{type:'cross'}, backgroundColor:C.bg, borderColor:C.grid, textStyle:{color:C.text} },
-    legend:{ data:['K','D','J'], top:4, textStyle:{color:C.axis,fontSize:10}, itemWidth:12,itemHeight:2 },
-    grid:{ left:'8%', right:'3%', top:'14%', bottom:'18%' },
-    xAxis:{ type:'category', data:stockData.dates, axisLine:{lineStyle:{color:C.grid}}, axisLabel:{color:C.axis,fontSize:10}, splitLine:{show:false} },
-    yAxis:{ axisLabel:{color:C.axis,fontSize:10}, splitLine:{lineStyle:{color:C.grid}} },
-    dataZoom:[ { type:'inside', start:0, end:100 }, { type:'slider', bottom:2, height:14, borderColor:C.grid, fillerColor:'rgba(88,166,255,0.1)', textStyle:{color:C.axis,fontSize:9} } ],
-    series:[
-      { name:'K', type:'line', data:r.k, symbol:'none', lineStyle:{width:1.5,color:C.blue} },
-      { name:'D', type:'line', data:r.d, symbol:'none', lineStyle:{width:1.5,color:C.yellow} },
-      { name:'J', type:'line', data:r.j, symbol:'none', lineStyle:{width:1.5,color:C.up} },
-      { type:'line', data:[], markLine:{ silent:true, symbol:'none', lineStyle:{type:'dashed'}, data:[
-        { yAxis:80, lineStyle:{color:C.up+'88'}, label:{color:C.up,fontSize:10,formatter:'80 超买'} },
-        { yAxis:20, lineStyle:{color:C.down+'88'}, label:{color:C.down,fontSize:10,formatter:'20 超卖'} }
-      ] } }
-    ]
-  }, true);
-}
-
-function renderBoll(){
-  if(!stockData) return;
-  var p = params.boll;
-  var r = calcBoll(stockData.closes, p.period, p.std);
-
-  charts.boll.setOption({
-    backgroundColor:'transparent',
-    tooltip:{ trigger:'axis', axisPointer:{type:'cross'}, backgroundColor:C.bg, borderColor:C.grid, textStyle:{color:C.text} },
-    legend:{ data:['收盘价','上轨','中轨','下轨'], top:4, textStyle:{color:C.axis,fontSize:10}, itemWidth:12,itemHeight:2 },
-    grid:{ left:'8%', right:'3%', top:'14%', bottom:'18%' },
-    xAxis:{ type:'category', data:stockData.dates, axisLine:{lineStyle:{color:C.grid}}, axisLabel:{color:C.axis,fontSize:10}, splitLine:{show:false} },
-    yAxis:{ scale:true, axisLabel:{color:C.axis,fontSize:10}, splitLine:{lineStyle:{color:C.grid}} },
-    dataZoom:[ { type:'inside', start:0, end:100 }, { type:'slider', bottom:2, height:14, borderColor:C.grid, fillerColor:'rgba(88,166,255,0.1)', textStyle:{color:C.axis,fontSize:9} } ],
-    series:[
-      { name:'收盘价', type:'line', data:stockData.closes, symbol:'none', lineStyle:{width:1,color:C.text} },
-      { name:'上轨', type:'line', data:r.upper, symbol:'none', lineStyle:{width:1.2,color:C.up}, areaStyle:{ color:'rgba(248,81,73,0.03)' } },
-      { name:'中轨', type:'line', data:r.middle, symbol:'none', lineStyle:{width:1.2,color:C.yellow,type:'dashed'} },
-      { name:'下轨', type:'line', data:r.lower, symbol:'none', lineStyle:{width:1.2,color:C.down} }
-    ]
-  }, true);
-}
-
-function updateIndicator(ind){
-  if(!stockData) return;
-  if(ind==='macd') renderMACD();
-  else if(ind==='rsi') renderRSI();
-  else if(ind==='kdj') renderKDJ();
-  else if(ind==='boll') renderBoll();
-}
-
-function renderAll(){
-  renderKLine();
-  renderMACD();
-  renderRSI();
-  renderKDJ();
-  renderBoll();
-  echarts.connect('stock');
-}
-
-// ===================== 信息栏更新 =====================
-function updateInfoBar(){
-  if(!stockData) return;
-  var d = stockData;
-  var last = d.closes.length - 1;
-  var firstClose = d.closes[0];
-  var lastClose = d.closes[last];
-  var changePct = ((lastClose - firstClose) / firstClose * 100).toFixed(2);
-  var maxHigh = Math.max.apply(null, d.highs);
-  var minLow  = Math.min.apply(null, d.lows);
-
-  document.getElementById('iName').textContent = d.name + '(' + d.code + ')';
-  document.getElementById('iName').className = 'info-value';
-  document.getElementById('iPrice').textContent = '¥' + lastClose.toFixed(2);
-  document.getElementById('iPrice').className = 'info-value ' + (changePct>=0 ? 'up':'down');
-  var chgEl = document.getElementById('iChange');
-  chgEl.textContent = (changePct>=0 ? '+':'') + changePct + '%';
-  chgEl.className = 'info-value ' + (changePct>=0 ? 'up':'down');
-  document.getElementById('iCount').textContent = d.dates.length + ' 个交易日';
-  document.getElementById('iHigh').textContent = '¥' + maxHigh.toFixed(2);
-  document.getElementById('iLow').textContent = '¥' + minLow.toFixed(2);
-}
-
-// ===================== 事件绑定 =====================
-function bindEvents(){
-  // 加载按钮
-  document.getElementById('loadBtn').addEventListener('click', loadData);
-
-  // 回车加载
-  document.getElementById('stockInput').addEventListener('keypress', function(e){
-    if(e.key==='Enter') loadData();
-  });
-
-  // 快选按钮
-  var qs = document.getElementById('quickSelect');
-  quickStocks.forEach(function(s){
-    var btn = document.createElement('button');
-    btn.className = 'quick-btn';
-    btn.textContent = s.name + ' ' + s.code;
-    btn.dataset.code = s.code;
-    btn.addEventListener('click', function(){
-      document.getElementById('stockInput').value = s.code;
-      document.querySelectorAll('.quick-btn').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      loadData();
-    });
-    qs.appendChild(btn);
-  });
-
-  // 参数滑块
-  document.querySelectorAll('input[type=range][data-ind]').forEach(function(slider){
-    slider.addEventListener('input', debounce(function(e){
-      var ind = e.target.dataset.ind;
-      var key = e.target.dataset.key;
-      var val = parseFloat(e.target.value);
-      params[ind][key] = val;
-      document.getElementById(ind + '-' + key + '-val').textContent = val;
-      updateIndicator(ind);
-    }, 200));
-  });
-
-  // 重置按钮
-  document.querySelectorAll('.reset-btn').forEach(function(btn){
-    btn.addEventListener('click', function(e){
-      var ind = e.target.dataset.ind;
-      params[ind] = JSON.parse(JSON.stringify(defaults[ind]));
-      // 更新滑块和显示
-      for(var key in defaults[ind]){
-        var slider = document.querySelector('input[data-ind="'+ind+'"][data-key="'+key+'"]');
-        if(slider){
-          slider.value = defaults[ind][key];
-          document.getElementById(ind+'-'+key+'-val').textContent = defaults[ind][key];
-        }
-      }
-      updateIndicator(ind);
-    });
-  });
-}
-
-// ===================== 加载数据 =====================
-async function loadData(){
-  var code = document.getElementById('stockInput').value.trim();
-  var startDate = document.getElementById('startDate').value;
-  var endDate = document.getElementById('endDate').value;
-  var errEl = document.getElementById('errorMsg');
-  errEl.classList.remove('show');
-
-  if(!code){
-    errEl.textContent = '请输入股票代码';
-    errEl.classList.add('show');
-    return;
-  }
-  if(!/^\d{6}$/.test(code)){
-    errEl.textContent = '股票代码应为6位数字，如 300251';
-    errEl.classList.add('show');
-    return;
-  }
-
-  document.getElementById('loadingOverlay').classList.add('active');
-
-  try {
-    stockData = await fetchStockData(code, startDate, endDate);
-    document.getElementById('loadingOverlay').classList.remove('active');
-    updateInfoBar();
-    renderAll();
-  } catch(err) {
-    document.getElementById('loadingOverlay').classList.remove('active');
-    errEl.textContent = '加载失败: ' + err.message;
-    errEl.classList.add('show');
-  }
-}
-
-// ===================== 初始化 =====================
-function init(){
-  // 设置默认日期：近一年
-  var today = new Date();
-  var oneYearAgo = new Date(today);
-  oneYearAgo.setFullYear(today.getFullYear() - 1);
-  document.getElementById('endDate').value = today.toISOString().substring(0,10);
-  document.getElementById('startDate').value = oneYearAgo.toISOString().substring(0,10);
-
-  initCharts();
-  bindEvents();
-
-  // 自动加载默认股票
-  loadData();
-}
-
-init();
-</script>
 </body>
 </html>
