@@ -3,29 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Quant - 光线传媒 量化分析项目 [前复权]</title>
+    <title>AI Quant - 光线传媒 量化分析项目</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e0e0e0; min-height: 100vh; }
-        .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; z-index: 0; }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none; z-index: 0;
+        }
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+        
         header { text-align: center; margin-bottom: 50px; }
         header h1 { font-size: 36px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
         header .subtitle { font-size: 16px; color: #8892b0; }
         header .stock-tag { display: inline-block; background: rgba(102,126,234,0.2); color: #667eea; padding: 4px 16px; border-radius: 20px; font-size: 14px; margin-top: 12px; border: 1px solid rgba(102,126,234,0.3); }
-        header .qfq-tag { display: inline-block; background: rgba(52,152,219,0.2); color: #3498db; padding: 4px 16px; border-radius: 20px; font-size: 14px; margin-top: 12px; border: 1px solid rgba(52,152,219,0.3); margin-left: 8px; }
+
         .section-title { font-size: 20px; color: #ccd6f6; margin: 36px 0 18px; padding-bottom: 8px; border-bottom: 2px solid rgba(102,126,234,0.3); }
+
         .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: rgba(26,26,46,0.8); border: 1px solid rgba(102,126,234,0.15); border-radius: 14px; padding: 24px; transition: all 0.3s ease; cursor: pointer; text-decoration: none; color: inherit; display: block; }
-        .card:hover { transform: translateY(-4px); border-color: rgba(102,126,234,0.5); box-shadow: 0 8px 30px rgba(102,126,234,0.2); background: rgba(26,26,46,0.95); }
+        .card {
+            background: rgba(26,26,46,0.8);
+            border: 1px solid rgba(102,126,234,0.15);
+            border-radius: 14px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102,126,234,0.5);
+            box-shadow: 0 8px 30px rgba(102,126,234,0.2);
+            background: rgba(26,26,46,0.95);
+        }
         .card .icon { font-size: 32px; margin-bottom: 12px; }
         .card h3 { font-size: 17px; color: #ccd6f6; margin-bottom: 8px; }
         .card p { font-size: 13px; color: #8892b0; line-height: 1.7; }
-        .card .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; margin-top: 10px; }
+        .card .badge {
+            display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 11px; margin-top: 10px;
+        }
         .badge-chart { background: rgba(39,174,96,0.2); color: #27ae60; border: 1px solid rgba(39,174,96,0.3); }
         .badge-report { background: rgba(102,126,234,0.2); color: #667eea; border: 1px solid rgba(102,126,234,0.3); }
         .badge-data { background: rgba(243,156,18,0.2); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
         .badge-nb { background: rgba(231,76,60,0.2); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+
         footer { text-align: center; margin-top: 60px; padding: 20px; color: #495670; font-size: 12px; }
         footer a { color: #667eea; text-decoration: none; }
     </style>
@@ -33,59 +65,69 @@
 <body>
 <div class="bg-grid"></div>
 <div class="container">
+
     <header>
         <h1>AI Quant · 光线传媒</h1>
-        <div class="subtitle">基于 Tushare 数据的量化分析项目（前复权数据）</div>
+        <div class="subtitle">基于 Tushare 数据的量化分析项目</div>
         <span class="stock-tag">300251.SZ · 光线传媒</span>
-        <span class="qfq-tag">前复权 (qfq)</span>
     </header>
+
     <div class="section-title">📊 交互式看板</div>
     <div class="cards">
         <a class="card" href="光线传媒_看板.html">
             <div class="icon">📈</div>
-            <h3>K线看板（前复权）</h3>
+            <h3>K线看板（ECharts）</h3>
             <p>日K蜡烛图 + MA5/10/20/60 均线 + 成交量柱状图。支持滚轮缩放、拖拽平移、十字光标联动。</p>
             <span class="badge badge-chart">交互式图表</span>
         </a>
         <a class="card" href="光线传媒_收盘价趋势图.html">
             <div class="icon">📉</div>
-            <h3>收盘价趋势图（前复权）</h3>
+            <h3>收盘价趋势图</h3>
             <p>每日收盘价红色折线 + MA20 黄色均线。带区域填充、缩放、滑块拖拽。</p>
             <span class="badge badge-chart">交互式图表</span>
         </a>
     </div>
+
     <div class="section-title">📑 分析报告</div>
     <div class="cards">
         <a class="card" href="光线传媒_分析报告.html">
             <div class="icon">📋</div>
-            <h3>股票分析报告（前复权）</h3>
-            <p>8张技术指标图表：价格统计 + K线/均线 + 成交量 + MACD + RSI + KDJ + 布林带 + 涨跌幅统计。每图含标号和解读。</p>
+            <h3>股票分析报告（图表版）</h3>
+            <p>8张技术指标图表：价格统计 + K线/均线 + 成交量 + MACD + RSI + KDJ + 布林带 + 估值分布。每图含标号和解读。</p>
             <span class="badge badge-report">图表内嵌</span>
         </a>
+        <a class="card" href="光线传媒_分析报告_独立版.html">
+            <div class="icon">📦</div>
+            <h3>分析报告（独立版）</h3>
+            <p>同上，但所有图表以 Base64 内嵌，单个文件即可分享，无需依赖外部资源。</p>
+            <span class="badge badge-report">可离线分享</span>
+        </a>
     </div>
+
     <div class="section-title">🗂️ 数据与代码</div>
     <div class="cards">
         <a class="card" href="光线传媒_300251_daily.csv">
             <div class="icon">📄</div>
-            <h3>日线数据 CSV（前复权）</h3>
-            <p>245条记录，含日期/开/高/低/收/成交量/成交额/涨跌幅/复权因子。UTF-8编码。</p>
+            <h3>日线数据 CSV</h3>
+            <p>243条记录，含日期/开/高/低/收/成交量/成交额/涨跌幅。UTF-8编码，Excel/Pandas 直读。</p>
             <span class="badge badge-data">CSV 数据</span>
         </a>
         <a class="card" href="光线传媒_数据分析.ipynb">
             <div class="icon">📓</div>
             <h3>Jupyter Notebook</h3>
-            <p>21个 Cell：Tushare API 获取 → 数据清洗 → 图表 → 统计分析 → CSV 导出。完整可复现流程。</p>
+            <p>21个 Cell：Tushare API 获取 → 数据清洗 → matplotlib/mplfinance 图表 → 统计分析 → CSV 导出。完整可复现流程。</p>
             <span class="badge badge-nb">Python Notebook</span>
         </a>
         <a class="card" href="光线传媒_300251_daily.json">
             <div class="icon">🗃️</div>
-            <h3>日线数据 JSON（前复权）</h3>
-            <p>前复权日线数据，含完整 OHLCV 字段和复权因子。</p>
+            <h3>日线数据 JSON</h3>
+            <p>原始 Tushare daily 接口返回数据，226+条记录，含完整 OHLCV 字段。</p>
             <span class="badge badge-data">JSON 数据</span>
         </a>
     </div>
+
     <footer>
-        <p>数据来源：Tushare Pro (前复权) · 生成时间：2026-07-03</p>
+        <p>数据来源：Tushare Pro · 生成时间：2026-07-02</p>
         <p><a href="https://github.com/Fisher-code829/Ai-Quant">GitHub 仓库</a> · 本页面仅供参考，不构成投资建议</p>
     </footer>
 </div>
