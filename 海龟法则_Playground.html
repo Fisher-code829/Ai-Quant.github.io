@@ -332,7 +332,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
     </div>
 
     <div class="footer-info">
-      数据来源：东方财富 · 策略引擎：纯前端计算 · 回测结果仅供学习参考，不构成投资建议
+      数据来源：Tushare · 策略引擎：纯前端计算 · 回测结果仅供学习参考，不构成投资建议
     </div>
   </main>
 </div>
@@ -407,6 +407,7 @@ timeBtns.forEach(btn => {
     timeBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedDays = parseInt(btn.dataset.days);
+    if (backtestResult) doBacktest(); // 自动重跑回测
   });
 });
 // default active
@@ -428,20 +429,38 @@ $('customCode').addEventListener('keydown', e => {
 });
 
 // ======================== DATA FETCH ========================
+let tushareStore = null; // 全局缓存：{ meta:{}, stocks:{}, updated:"" }
+
+async function loadTushareStore() {
+  if (tushareStore) return tushareStore;
+  const resp = await fetch('data/tushare_stocks.json');
+  if (!resp.ok) throw new Error('Tushare数据文件加载失败 (data/tushare_stocks.json)');
+  tushareStore = await resp.json();
+  return tushareStore;
+}
+
 async function fetchStockData(code) {
-  const secid = (code.startsWith('6') || code.startsWith('5') || code.startsWith('9'))
-    ? '1.' + code : '0.' + code;
-  const limit = selectedDays + 100;
-  const url = `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${secid}&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=101&fqt=1&end=20500101&limit=${limit}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (!data.data || !data.data.klines) throw new Error('无数据');
-  const lines = data.data.klines;
-  const parsed = lines.map(line => {
-    const [date, open, close, low, high, vol] = line.split(',').map((v, i) => i === 0 ? v : parseFloat(v));
-    return { date, open, close, low, high, vol };
-  });
-  return parsed;
+  const store = await loadTushareStore();
+    const raw = store.stocks[code];
+    if (!raw || !raw.length) throw new Error('股票 ' + code + ' 在 Tushare 数据中未找到。\nA股数据每日19:00自动更新；ETF数据需更高Tushare积分。\n或运行 fetch_tushare_data.py 手动更新。');
+
+  // 按日期排序（Tushare格式: YYYYMMDD）
+  raw.sort((a, b) => a.date.localeCompare(b.date));
+
+  // 按时段筛选：取最近的 selectedDays 个自然日数据
+  const endDate = raw[raw.length - 1].date;
+  const cutoff = new Date(endDate.slice(0,4), endDate.slice(4,6)-1, endDate.slice(6,8));
+  cutoff.setDate(cutoff.getDate() - selectedDays - 30);
+  const cutoffStr = cutoff.toISOString().slice(0,10).replace(/-/g, '');
+
+  const filtered = raw.filter(d => d.date >= cutoffStr);
+  if (filtered.length < 50) return raw.slice(-200); // 兜底
+
+  // 转换为看板需要的格式（date 转为 YYYY-MM-DD）
+  return filtered.map(d => ({
+    date: d.date.slice(0,4) + '-' + d.date.slice(4,6) + '-' + d.date.slice(6,8),
+    open: d.open, close: d.close, low: d.low, high: d.high, vol: d.vol
+  }));
 }
 
 // ======================== INDICATORS ========================
