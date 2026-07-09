@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海龟法则 Playground</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#0d1117}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#484f58}
+
+/* Header */
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:16px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:20px;font-weight:600;color:#58a6ff;white-space:nowrap}
+.header h1 span{font-size:14px;font-weight:400;color:#8b949e;margin-left:6px}
+.header-sub{font-size:12px;color:#8b949e;margin-left:4px}
+
+/* Layout */
+.app{display:flex;height:calc(100vh - 57px);overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:300px;min-width:300px;background:#161b22;border-right:1px solid #30363d;overflow-y:auto;padding:16px;flex-shrink:0}
+.panel-group{margin-bottom:20px}
+.panel-title{font-size:13px;font-weight:600;color:#58a6ff;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:6px}
+.panel-title .icon{font-size:14px}
+
+/* Form controls */
+.form-row{margin-bottom:10px}
+.form-label{display:block;font-size:12px;color:#8b949e;margin-bottom:4px}
+.form-select,.form-input{width:100%;background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:7px 10px;border-radius:6px;font-size:13px;outline:none;transition:border-color .2s}
+.form-select:focus,.form-input:focus{border-color:#58a6ff}
+.form-select{cursor:pointer}
+
+/* Segmented buttons */
+.seg-group{display:flex;gap:4px;margin-bottom:10px}
+.seg-btn{flex:1;padding:6px 0;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#8b949e;font-size:12px;cursor:pointer;transition:all .2s}
+.seg-btn:hover{background:#21262d}
+.seg-btn.active{background:#1f6feb;border-color:#1f6feb;color:#fff}
+
+/* Slider */
+.slider-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.slider-label{font-size:12px;color:#8b949e;min-width:90px;white-space:nowrap}
+.slider-val{font-size:12px;font-weight:600;color:#58a6ff;min-width:30px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:#30363d;border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#58a6ff;cursor:pointer;border:2px solid #0d1117}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#58a6ff;cursor:pointer;border:2px solid #0d1117}
+
+/* Toggle */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.toggle-label{font-size:12px;color:#c9d1d9}
+.toggle-label small{color:#8b949e}
+.toggle-switch{position:relative;width:40px;height:22px;cursor:pointer}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#30363d;border-radius:22px;transition:background .2s}
+.toggle-slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#8b949e;border-radius:50%;transition:transform .2s}
+.toggle-switch input:checked+.toggle-slider{background:#238636}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(18px);background:#fff}
+
+/* Buttons */
+.btn-group{display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;padding:8px 0;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s}
+.btn-primary{background:#238636;color:#fff}
+.btn-primary:hover{background:#2ea043}
+.btn-secondary{background:#21262d;border:1px solid #30363d;color:#c9d1d9}
+.btn-secondary:hover{background:#30363d}
+
+/* Main Content */
+.main{flex:1;overflow-y:auto;background:#0d1117}
+
+/* Metric Cards */
+.metrics-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:16px 20px;background:#161b22;border-bottom:1px solid #30363d}
+.metric-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px 10px;text-align:center}
+.metric-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.metric-label{font-size:11px;color:#8b949e}
+.metric-value.up{color:#f85149}
+.metric-value.down{color:#3fb950}
+.metric-value.neut{color:#c9d1d9}
+
+/* Charts */
+.charts-area{padding:16px 20px}
+.chart-row{display:grid;gap:16px;margin-bottom:16px}
+.chart-row-1{grid-template-columns:1fr}
+.chart-panel{background:#161b22;border:1px solid #30363d;border-radius:8px;overflow:hidden}
+.chart-header{padding:10px 14px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:8px}
+.chart-title{font-size:13px;font-weight:600;color:#c9d1d9}
+.chart-box{width:100%;height:360px}
+.chart-box-large{height:420px}
+
+/* Legend */
+.legend-bar{display:flex;gap:16px;align-items:center;padding:8px 14px;font-size:11px;color:#8b949e;border-bottom:1px solid #21262d;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:4px;cursor:pointer}
+.legend-item input{margin:0}
+.legend-item span{font-size:11px}
+
+/* Loading */
+.loading-overlay{position:fixed;inset:0;background:rgba(13,17,23,.85);display:none;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:12px}
+.loading-overlay.active{display:flex}
+.spinner{width:40px;height:40px;border:3px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:#8b949e}
+
+/* Error */
+.error-bar{background:#3d1218;border:1px solid #f85149;border-radius:6px;padding:10px 16px;color:#f85149;font-size:13px;margin:0 20px 16px;display:none}
+.error-bar.show{display:block}
+
+/* Footer info */
+.footer-info{padding:12px 20px;font-size:11px;color:#484f58;border-top:1px solid #21262d}
+.footer-info a{color:#58a6ff;text-decoration:none}
+
+/* Responsive */
+@media(max-width:1200px){
+  .metrics-bar{grid-template-columns:repeat(3,1fr)}
+  .sidebar{width:280px;min-width:280px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;max-height:45vh;border-right:none;border-bottom:1px solid #30363d}
+  .metrics-bar{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🐢 海龟法则 <span>Playground</span></h1>
+  <span class="header-sub">Donchian Channel + ATR · 参数可调 · 实时回测</span>
+</div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="panel-group">
+      <div class="panel-title"><span class="icon">📋</span>标的</div>
+      <div class="form-row">
+        <select class="form-select" id="stockSelect">
+          <optgroup label="A股 热门">
+            <option value="600519" data-name="贵州茅台">600519 贵州茅台</option>
+            <option value="300750" data-name="宁德时代">300750 宁德时代</option>
+            <option value="300251" data-name="光线传媒">300251 光线传媒</option>
+            <option value="002594" data-name="比亚迪">002594 比亚迪</option>
+            <option value="601318" data-name="中国平安">601318 中国平安</option>
+            <option value="600036" data-name="招商银行">600036 招商银行</option>
+            <option value="600900" data-name="长江电力">600900 长江电力</option>
+            <option value="601012" data-name="隆基绿能">601012 隆基绿能</option>
+            <option value="600276" data-name="恒瑞医药">600276 恒瑞医药</option>
+            <option value="603288" data-name="海天味业">603288 海天味业</option>
+            <option value="601888" data-name="中国中免">601888 中国中免</option>
+            <option value="600030" data-name="中信证券">600030 中信证券</option>
+            <option value="601899" data-name="紫金矿业">601899 紫金矿业</option>
+            <option value="600887" data-name="伊利股份">600887 伊利股份</option>
+            <option value="000858" data-name="五粮液">000858 五粮液</option>
+            <option value="002415" data-name="海康威视">002415 海康威视</option>
+            <option value="300059" data-name="东方财富">300059 东方财富</option>
+            <option value="000001" data-name="平安银行">000001 平安银行</option>
+            <option value="002475" data-name="立讯精密">002475 立讯精密</option>
+            <option value="000333" data-name="美的集团">000333 美的集团</option>
+            <option value="000725" data-name="京东方A">000725 京东方A</option>
+            <option value="002271" data-name="东方雨虹">002271 东方雨虹</option>
+            <option value="600809" data-name="山西汾酒">600809 山西汾酒</option>
+            <option value="601688" data-name="华泰证券">601688 华泰证券</option>
+            <option value="002352" data-name="顺丰控股">002352 顺丰控股</option>
+            <option value="300124" data-name="汇川技术">300124 汇川技术</option>
+            <option value="300274" data-name="阳光电源">300274 阳光电源</option>
+            <option value="300760" data-name="迈瑞医疗">300760 迈瑞医疗</option>
+            <option value="000568" data-name="泸州老窖">000568 泸州老窖</option>
+          </optgroup>
+          <optgroup label="科创板">
+            <option value="688981" data-name="中芯国际" selected>688981 中芯国际</option>
+            <option value="688111" data-name="金山办公">688111 金山办公</option>
+            <option value="688008" data-name="澜起科技">688008 澜起科技</option>
+            <option value="688012" data-name="中微公司">688012 中微公司</option>
+            <option value="688036" data-name="传音控股">688036 传音控股</option>
+            <option value="688599" data-name="天合光能">688599 天合光能</option>
+          </optgroup>
+          <optgroup label="ETF">
+            <option value="510300" data-name="沪深300ETF">510300 沪深300ETF</option>
+            <option value="510050" data-name="上证50ETF">510050 上证50ETF</option>
+            <option value="510500" data-name="中证500ETF">510500 中证500ETF</option>
+            <option value="159915" data-name="创业板ETF">159915 创业板ETF</option>
+            <option value="512000" data-name="券商ETF">512000 券商ETF</option>
+            <option value="512880" data-name="证券ETF">512880 证券ETF</option>
+            <option value="510900" data-name="H股ETF">510900 H股ETF</option>
+            <option value="515030" data-name="新能源车ETF">515030 新能源车ETF</option>
+            <option value="515790" data-name="光伏ETF">515790 光伏ETF</option>
+            <option value="512690" data-name="酒ETF">512690 酒ETF</option>
+            <option value="512480" data-name="半导体ETF">512480 半导体ETF</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-row">
+        <input type="text" class="form-input" id="customCode" placeholder="自定义代码 (6位) 回车确认" maxlength="6">
+      </div>
+    </div>
+
+    <div class="panel-group">
+      <div class="panel-title"><span class="icon">📅</span>时段</div>
+      <div class="seg-group">
+        <button class="seg-btn" data-days="1095">3年</button>
+        <button class="seg-btn" data-days="365">1年</button>
+        <button class="seg-btn" data-days="180">6月</button>
+        <button class="seg-btn" data-days="90">3月</button>
+      </div>
+    </div>
+
+    <div class="panel-group">
+      <div class="panel-title"><span class="icon">⚙️</span>策略参数</div>
+      <div class="seg-group">
+        <button class="seg-btn active" data-preset="classic">经典</button>
+        <button class="seg-btn" data-preset="short">短线</button>
+        <button class="seg-btn" data-preset="long">长线</button>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">入场通道 N</span>
+        <input type="range" id="entryN" min="5" max="60" value="20" step="1">
+        <span class="slider-val" id="entryNVal">20</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">退出通道 M</span>
+        <input type="range" id="exitM" min="5" max="40" value="10" step="1">
+        <span class="slider-val" id="exitMVal">10</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">ATR 周期</span>
+        <input type="range" id="atrPeriod" min="5" max="30" value="20" step="1">
+        <span class="slider-val" id="atrPeriodVal">20</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">加减仓系数</span>
+        <input type="range" id="addCoeff" min="1" max="10" value="5" step="1">
+        <span class="slider-val" id="addCoeffVal">0.5</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">最大持仓</span>
+        <input type="range" id="maxUnits" min="1" max="5" value="2" step="1">
+        <span class="slider-val" id="maxUnitsVal">2</span>
+      </div>
+    </div>
+
+    <div class="panel-group">
+      <div class="panel-title"><span class="icon">💰</span>交易设置</div>
+      <div class="form-row">
+        <label class="form-label">初始资金 (万元)</label>
+        <input type="number" class="form-input" id="initialCapital" value="10" min="1" step="1">
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">手续费 <small>万三</small></span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="feeToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">滑点 <small>万一</small></span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="slipToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="runBtn">🚀 运行回测</button>
+      <button class="btn btn-secondary" id="resetBtn">重置</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="error-bar" id="errorBar"></div>
+
+    <!-- Metric Cards -->
+    <div class="metrics-bar" id="metricsBar">
+      <div class="metric-card">
+        <div class="metric-value neut" id="mAnnRet">--</div>
+        <div class="metric-label">年化收益率</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value neut" id="mSharpe">--</div>
+        <div class="metric-label">夏普比率</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value neut" id="mMaxDD">--</div>
+        <div class="metric-label">最大回撤</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value neut" id="mWinRate">--</div>
+        <div class="metric-label">胜率</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value neut" id="mTrades">--</div>
+        <div class="metric-label">交易笔数</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value neut" id="mStops">--</div>
+        <div class="metric-label">止损次数</div>
+      </div>
+    </div>
+
+    <div class="charts-area">
+      <!-- Chart 1: Net Value -->
+      <div class="chart-panel" style="margin-bottom:16px">
+        <div class="chart-header">
+          <span class="chart-title">📈 净值曲线</span>
+        </div>
+        <div class="legend-bar">
+          <label class="legend-item"><input type="checkbox" id="showStrategy" checked><span style="color:#f85149">● 策略净值</span></label>
+          <label class="legend-item"><input type="checkbox" id="showFull" checked><span style="color:#8b949e">● 满仓买入持有</span></label>
+          <label class="legend-item"><input type="checkbox" id="showEqual" checked><span style="color:#58a6ff">● 等仓位买入持有</span></label>
+        </div>
+        <div class="chart-box chart-box-large" id="chartNetValue"></div>
+      </div>
+
+      <!-- Chart 2: Price + Channel + Signals -->
+      <div class="chart-panel">
+        <div class="chart-header">
+          <span class="chart-title">🎯 交易信号（唐奇安通道 + 买卖点）</span>
+        </div>
+        <div class="legend-bar">
+          <label class="legend-item"><input type="checkbox" id="showPrice" checked><span style="color:#c9d1d9">● 收盘价</span></label>
+          <label class="legend-item"><input type="checkbox" id="showUpper" checked><span style="color:#f85149">● 入场上轨(N)</span></label>
+          <label class="legend-item"><input type="checkbox" id="showLower" checked><span style="color:#3fb950">● 出场下轨(M)</span></label>
+          <label class="legend-item"><input type="checkbox" id="showBuy" checked><span style="color:#f85149">▲ 买入</span></label>
+          <label class="legend-item"><input type="checkbox" id="showSell" checked><span style="color:#3fb950">▼ 卖出</span></label>
+          <label class="legend-item"><input type="checkbox" id="showStop" checked><span style="color:#bc8cff">✕ 止损</span></label>
+        </div>
+        <div class="chart-box chart-box-large" id="chartSignal"></div>
+      </div>
+    </div>
+
+    <div class="footer-info">
+      数据来源：东方财富 · 策略引擎：纯前端计算 · 回测结果仅供学习参考，不构成投资建议
+    </div>
+  </main>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">正在获取数据并计算回测...</div>
+</div>
+
+<script>
+// ======================== CONFIG ========================
+const FEE_RATE = 0.0003;   // 手续费万三
+const SLIP_RATE = 0.0001;  // 滑点万一
+const RISK_PCT = 0.02;     // 每笔风险 2%
+
+// ======================== STATE ========================
+let chartNetValue, chartSignal;
+let rawData = [];
+let backtestResult = null;
+
+// ======================== DOM refs ========================
+const $ = id => document.getElementById(id);
+const stockSelect = $('stockSelect');
+const customCode = $('customCode');
+const entryN = $('entryN');
+const exitM = $('exitM');
+const atrPeriod = $('atrPeriod');
+const addCoeff = $('addCoeff');
+const maxUnits = $('maxUnits');
+const initialCapital = $('initialCapital');
+const feeToggle = $('feeToggle');
+const slipToggle = $('slipToggle');
+const runBtn = $('runBtn');
+const resetBtn = $('resetBtn');
+const errorBar = $('errorBar');
+const loadingOverlay = $('loadingOverlay');
+
+// Slider value displays
+const sliders = [
+  {el:entryN, val: $('entryNVal'), scale:1},
+  {el:exitM, val: $('exitMVal'), scale:1},
+  {el:atrPeriod, val: $('atrPeriodVal'), scale:1},
+  {el:addCoeff, val: $('addCoeffVal'), scale:0.1},
+  {el:maxUnits, val: $('maxUnitsVal'), scale:1}
+];
+sliders.forEach(s => {
+  s.el.addEventListener('input', () => {
+    const v = parseInt(s.el.value) * s.scale;
+    s.val.textContent = s.scale < 1 ? v.toFixed(1) : v;
+  });
+});
+
+// Preset buttons
+const presetBtns = document.querySelectorAll('[data-preset]');
+presetBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    presetBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const p = btn.dataset.preset;
+    if (p === 'classic') { entryN.value=20; exitM.value=10; atrPeriod.value=20; addCoeff.value=5; maxUnits.value=2; }
+    if (p === 'short') { entryN.value=10; exitM.value=5; atrPeriod.value=10; addCoeff.value=5; maxUnits.value=2; }
+    if (p === 'long') { entryN.value=55; exitM.value=20; atrPeriod.value=20; addCoeff.value=5; maxUnits.value=2; }
+    sliders.forEach(s => s.el.dispatchEvent(new Event('input')));
+  });
+});
+
+// Time period buttons
+const timeBtns = document.querySelectorAll('[data-days]');
+let selectedDays = 1095; // default 3 years
+timeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    timeBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedDays = parseInt(btn.dataset.days);
+  });
+});
+// default active
+const defaultTimeBtn = document.querySelector('[data-days="1095"]');
+if(defaultTimeBtn) defaultTimeBtn.classList.add('active');
+
+// Custom code
+$('customCode').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const code = e.target.value.trim();
+    if (/^\d{6}$/.test(code)) {
+      const opt = document.createElement('option');
+      opt.value = code; opt.textContent = code + ' 自定义'; opt.dataset.name = '自定义';
+      stockSelect.insertBefore(opt, stockSelect.firstChild);
+      stockSelect.value = code;
+      e.target.value = '';
+    }
+  }
+});
+
+// ======================== DATA FETCH ========================
+async function fetchStockData(code) {
+  const secid = (code.startsWith('6') || code.startsWith('5') || code.startsWith('9'))
+    ? '1.' + code : '0.' + code;
+  const limit = selectedDays + 100;
+  const url = `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${secid}&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=101&fqt=1&end=20500101&limit=${limit}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!data.data || !data.data.klines) throw new Error('无数据');
+  const lines = data.data.klines;
+  const parsed = lines.map(line => {
+    const [date, open, close, low, high, vol] = line.split(',').map((v, i) => i === 0 ? v : parseFloat(v));
+    return { date, open, close, low, high, vol };
+  });
+  return parsed;
+}
+
+// ======================== INDICATORS ========================
+function calcDonchian(data, n) {
+  const upper = new Array(data.length).fill(null);
+  const lower = new Array(data.length).fill(null);
+  for (let i = n - 1; i < data.length; i++) {
+    let max = -Infinity, min = Infinity;
+    for (let j = i - n + 1; j <= i; j++) {
+      max = Math.max(max, data[j].high);
+      min = Math.min(min, data[j].low);
+    }
+    upper[i] = max;
+    lower[i] = min;
+  }
+  return { upper, lower };
+}
+
+function calcATR(data, period) {
+  const atr = new Array(data.length).fill(null);
+  const tr = new Array(data.length).fill(0);
+  for (let i = 1; i < data.length; i++) {
+    const h = data[i].high, l = data[i].low, pc = data[i-1].close;
+    tr[i] = Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc));
+  }
+  // EMA ATR
+  let ema = 0; let count = 0;
+  for (let i = 1; i < data.length; i++) {
+    count++;
+    if (count === 1) ema = tr[i];
+    else ema = (tr[i] * 2 / (period + 1)) + (ema * (period - 1) / (period + 1));
+    if (count >= period) atr[i] = ema;
+  }
+  return atr;
+}
+
+function calcSMA(arr, period) {
+  const sma = new Array(arr.length).fill(null);
+  for (let i = period - 1; i < arr.length; i++) {
+    let sum = 0;
+    for (let j = i - period + 1; j <= i; j++) sum += arr[j];
+    sma[i] = sum / period;
+  }
+  return sma;
+}
+
+// ======================== BACKTEST ========================
+function runBacktest(data) {
+  const n = parseInt(entryN.value);
+  const m = parseInt(exitM.value);
+  const atrP = parseInt(atrPeriod.value);
+  const coeff = parseInt(addCoeff.value) * 0.1; // 1/N factor
+  const maxU = parseInt(maxUnits.value);
+  const initCap = parseFloat(initialCapital.value) * 10000; // 万元 -> 元
+  const feeOn = feeToggle.checked;
+  const slipOn = slipToggle.checked;
+
+  const dcEntry = calcDonchian(data, n);
+  const dcExit = calcDonchian(data, m);
+  const atr = calcATR(data, atrP);
+
+  const signals = new Array(data.length).fill(0); // 0=none, 1=buy, -1=sell, -2=stop
+  const positions = new Array(data.length).fill(0); // units held
+  const nav = new Array(data.length).fill(initCap); // net value
+  const buyHolds = new Array(data.length).fill(initCap);
+  const equalHolds = new Array(data.length).fill(initCap);
+  const drawdowns = new Array(data.length).fill(0);
+  const trades = [];
+  const stops = [];
+
+  let cash = initCap;
+  let units = 0; // current units held
+  let totalShares = 0;
+  let entryPrices = []; // price of each unit entry
+  let peak = initCap;
+  let tradeCount = 0;
+  let stopCount = 0;
+  let wins = 0, losses = 0;
+  let profitSum = 0, lossSum = 0;
+
+  const firstValid = Math.max(n, m, atrP);
+  const price0 = data[firstValid].close;
+
+  for (let i = firstValid; i < data.length; i++) {
+    const price = data[i].close;
+    const prevPrice = data[i-1].close;
+    const upperE = dcEntry.upper[i-1]; // 用昨日通道判断今日
+    const lowerE = dcEntry.lower[i-1];
+    const upperX = dcExit.upper[i-1];
+    const lowerX = dcExit.lower[i-1];
+    const a = atr[i-1] || 0;
+
+    // Buy & Hold
+    buyHolds[i] = initCap * (price / price0);
+    equalHolds[i] = equalHolds[i-1] * (price / prevPrice);
+
+    if (i <= firstValid) { nav[i] = initCap; continue; }
+
+    let tradeToday = false;
+
+    // 1) 买入信号：突破入场上轨
+    if (price > upperE && units === 0) {
+      const unitValue = (cash * RISK_PCT) / (a || price * 0.02);
+      const shares = Math.floor(unitValue / price / 100) * 100;
+      if (shares > 0 && cash >= shares * price) {
+        const cost = shares * price;
+        const fee = feeOn ? cost * FEE_RATE : 0;
+        const slip = slipOn ? cost * SLIP_RATE : 0;
+        cash -= (cost + fee + slip);
+        totalShares += shares;
+        units = 1;
+        entryPrices = [price];
+        signals[i] = 1;
+        tradeToday = true;
+      }
+    }
+    // 2) 加仓：已持仓，价格上涨超过 coeff * ATR
+    else if (units > 0 && units < maxU && price > entryPrices[entryPrices.length - 1] + coeff * a) {
+      const unitValue = (initCap * RISK_PCT) / (a || price * 0.02);
+      const shares = Math.floor(unitValue / price / 100) * 100;
+      if (shares > 0 && cash >= shares * price) {
+        const cost = shares * price;
+        const fee = feeOn ? cost * FEE_RATE : 0;
+        const slip = slipOn ? cost * SLIP_RATE : 0;
+        cash -= (cost + fee + slip);
+        totalShares += shares;
+        units++;
+        entryPrices.push(price);
+        signals[i] = 1; // 买入标记
+        tradeToday = true;
+      }
+    }
+    // 3) 止损：价格跌破最近入场价 - 2*ATR
+    else if (units > 0 && price < entryPrices[entryPrices.length - 1] - 2 * a) {
+      const sellValue = totalShares * price;
+      const fee = feeOn ? sellValue * FEE_RATE : 0;
+      const slip = slipOn ? sellValue * SLIP_RATE : 0;
+      cash += (sellValue - fee - slip);
+      // record trade
+      const entryCost = entryPrices.reduce((s, ep) => s + totalShares / entryPrices.length * ep, 0); // approx
+      const entryAvg = entryPrices.reduce((s, ep) => s + ep, 0) / entryPrices.length;
+      const pnl = (price - entryAvg) / entryAvg;
+      if (pnl > 0) wins++; else losses++;
+      if (pnl > 0) profitSum += pnl; else lossSum += Math.abs(pnl);
+      tradeCount++;
+      stopCount++;
+      stops.push({date: data[i].date, price, type: 'stop'});
+      totalShares = 0; units = 0; entryPrices = [];
+      signals[i] = -2; // stop
+      tradeToday = true;
+    }
+    // 4) 出场信号：跌破出场下轨
+    else if (units > 0 && price < lowerX) {
+      const sellValue = totalShares * price;
+      const fee = feeOn ? sellValue * FEE_RATE : 0;
+      const slip = slipOn ? sellValue * SLIP_RATE : 0;
+      cash += (sellValue - fee - slip);
+      const entryAvg = entryPrices.reduce((s, ep) => s + ep, 0) / entryPrices.length;
+      const pnl = (price - entryAvg) / entryAvg;
+      if (pnl > 0) wins++; else losses++;
+      if (pnl > 0) profitSum += pnl; else lossSum += Math.abs(pnl);
+      tradeCount++;
+      totalShares = 0; units = 0; entryPrices = [];
+      signals[i] = -1; // sell
+      tradeToday = true;
+    }
+
+    // 持仓市值
+    const marketValue = totalShares * price;
+    nav[i] = cash + marketValue;
+    if (nav[i] > peak) peak = nav[i];
+    drawdowns[i] = (nav[i] - peak) / peak * 100;
+  }
+
+  // 强制平仓最后一天
+  const lastIdx = data.length - 1;
+  if (units > 0) {
+    const price = data[lastIdx].close;
+    const sellValue = totalShares * price;
+    const fee = feeOn ? sellValue * FEE_RATE : 0;
+    const slip = slipOn ? sellValue * SLIP_RATE : 0;
+    cash += (sellValue - fee - slip);
+    const entryAvg = entryPrices.reduce((s, ep) => s + ep, 0) / entryPrices.length;
+    const pnl = (price - entryAvg) / entryAvg;
+    if (pnl > 0) wins++; else losses++;
+    if (pnl > 0) profitSum += pnl; else lossSum += Math.abs(pnl);
+    tradeCount++;
+    nav[lastIdx] = cash;
+    totalShares = 0; units = 0;
+    signals[lastIdx] = -1;
+  }
+
+  // 过滤只保留有效日期
+  const validDates = data.slice(firstValid).map(d => d.date);
+  const validNav = nav.slice(firstValid);
+  const validBuyHold = buyHolds.slice(firstValid);
+  const validEqualHold = equalHolds.slice(firstValid);
+  const validDrawdown = drawdowns.slice(firstValid);
+  const validSignals = signals.slice(firstValid);
+  const validData = data.slice(firstValid);
+  const validUpperE = dcEntry.upper.slice(firstValid);
+  const validLowerE = dcEntry.lower.slice(firstValid);
+  const validUpperX = dcExit.upper.slice(firstValid);
+  const validLowerX = dcExit.lower.slice(firstValid);
+  const validATR = atr.slice(firstValid);
+
+  // Metrics
+  const totalDays = validData.length;
+  const totalReturn = (validNav[validNav.length - 1] - initCap) / initCap;
+  const buyHoldReturn = (validBuyHold[validBuyHold.length - 1] - initCap) / initCap;
+  const annRet = (Math.pow(1 + totalReturn, 252 / totalDays) - 1) * 100;
+  const annBuyHold = (Math.pow(1 + buyHoldReturn, 252 / totalDays) - 1) * 100;
+  const maxDD = Math.min(...validDrawdown);
+  const maxDDVal = maxDD;
+
+  // Sharpe
+  const navReturns = [];
+  for (let i = 1; i < validNav.length; i++) navReturns.push((validNav[i] - validNav[i-1]) / validNav[i-1]);
+  const meanR = navReturns.reduce((a, b) => a + b, 0) / navReturns.length;
+  const stdR = Math.sqrt(navReturns.reduce((a, b) => a + b * b, 0) / navReturns.length - meanR * meanR);
+  const sharpe = stdR > 0 ? (meanR / stdR) * Math.sqrt(252) : 0;
+
+  const winRate = tradeCount > 0 ? (wins / tradeCount) * 100 : 0;
+  const profitRatio = lossSum > 0 ? profitSum / lossSum : (profitSum > 0 ? Infinity : 0);
+
+  return {
+    dates: validDates, nav: validNav, buyHold: validBuyHold, equalHold: validEqualHold,
+    drawdown: validDrawdown, signals: validSignals, data: validData,
+    upperE: validUpperE, lowerE: validLowerE, upperX: validUpperX, lowerX: validLowerX,
+    atr: validATR, trades: tradeCount, stops: stopCount, wins, losses,
+    winRate, profitRatio, totalReturn, annRet, buyHoldReturn, annBuyHold,
+    maxDD: maxDDVal, sharpe, initCap
+  };
+}
+
+// ======================== RENDER ========================
+function renderMetrics(r) {
+  const set = (id, val, cls) => {
+    const el = $(id);
+    el.textContent = val;
+    el.className = 'metric-value ' + cls;
+  };
+  set('mAnnRet', (r.annRet >= 0 ? '+' : '') + r.annRet.toFixed(2) + '%', r.annRet >= 0 ? 'up' : 'down');
+  set('mSharpe', r.sharpe.toFixed(2), 'neut');
+  set('mMaxDD', r.maxDD.toFixed(2) + '%', 'down');
+  set('mWinRate', r.winRate.toFixed(2) + '%', 'neut');
+  set('mTrades', r.trades + ' 笔', 'neut');
+  set('mStops', r.stops + ' 次', 'neut');
+}
+
+function renderNetValue(r) {
+  const series = [];
+  if ($('showStrategy').checked) {
+    series.push({
+      name: '策略净值', type: 'line', data: r.nav.map(v => (v/10000).toFixed(2)),
+      smooth: true, symbol: 'none', lineStyle: {color: '#f85149', width: 2},
+      itemStyle: {color: '#f85149'}
+    });
+  }
+  if ($('showFull').checked) {
+    series.push({
+      name: '满仓买入持有', type: 'line', data: r.buyHold.map(v => (v/10000).toFixed(2)),
+      smooth: true, symbol: 'none', lineStyle: {color: '#8b949e', width: 1.5, type: 'dashed'},
+      itemStyle: {color: '#8b949e'}
+    });
+  }
+  if ($('showEqual').checked) {
+    series.push({
+      name: '等仓位买入持有', type: 'line', data: r.equalHold.map(v => (v/10000).toFixed(2)),
+      smooth: true, symbol: 'none', lineStyle: {color: '#58a6ff', width: 1.5, type: 'dashed'},
+      itemStyle: {color: '#58a6ff'}
+    });
+  }
+
+  chartNetValue.setOption({
+    backgroundColor: 'transparent',
+    grid: { left: 60, right: 40, top: 30, bottom: 40 },
+    tooltip: {
+      trigger: 'axis', backgroundColor: '#161b22', borderColor: '#30363d', textStyle: {color: '#c9d1d9'},
+      formatter: params => {
+        let s = `<div style="font-weight:600;margin-bottom:4px">${params[0].axisValue}</div>`;
+        params.forEach(p => s += `<div style="color:${p.color}">${p.marker} ${p.seriesName}: <b>¥${p.value}万</b></div>`);
+        return s;
+      }
+    },
+    legend: { show: false },
+    xAxis: { type: 'category', data: r.dates, axisLine: {lineStyle: {color: '#30363d'}},
+      axisLabel: {color: '#8b949e', fontSize: 11}, splitLine: {show: false} },
+    yAxis: { type: 'value', name: '万元', nameTextStyle: {color: '#8b949e'},
+      axisLine: {lineStyle: {color: '#30363d'}}, axisLabel: {color: '#8b949e', fontSize: 11, formatter: '¥{value}万'},
+      splitLine: {lineStyle: {color: '#21262d'}} },
+    series: series
+  }, true);
+}
+
+function renderSignal(r) {
+  const dates = r.dates;
+  const closes = r.data.map(d => d.close);
+  const buyData = dates.map((d, i) => r.signals[i] === 1 ? r.data[i].high : null);
+  const sellData = dates.map((d, i) => r.signals[i] === -1 ? r.data[i].low : null);
+  const stopData = dates.map((d, i) => r.signals[i] === -2 ? r.data[i].low : null);
+
+  const series = [];
+
+  if ($('showPrice').checked) {
+    series.push({
+      name: '收盘价', type: 'line', data: closes, smooth: true, symbol: 'none',
+      lineStyle: {color: '#c9d1d9', width: 1.5}, itemStyle: {color: '#c9d1d9'}
+    });
+  }
+  if ($('showUpper').checked) {
+    series.push({
+      name: '入场上轨(N)', type: 'line', data: r.upperE, smooth: false, symbol: 'none',
+      lineStyle: {color: '#f85149', width: 1, type: 'dashed'}, itemStyle: {color: '#f85149'}
+    });
+    series.push({
+      name: '入场下轨(N)', type: 'line', data: r.lowerE, smooth: false, symbol: 'none',
+      lineStyle: {color: '#f85149', width: 1, type: 'dashed'}, itemStyle: {color: '#f85149'}
+    });
+  }
+  if ($('showLower').checked) {
+    series.push({
+      name: '出场上轨(M)', type: 'line', data: r.upperX, smooth: false, symbol: 'none',
+      lineStyle: {color: '#3fb950', width: 1, type: 'dashed'}, itemStyle: {color: '#3fb950'}
+    });
+    series.push({
+      name: '出场下轨(M)', type: 'line', data: r.lowerX, smooth: false, symbol: 'none',
+      lineStyle: {color: '#3fb950', width: 1, type: 'dashed'}, itemStyle: {color: '#3fb950'}
+    });
+  }
+  if ($('showBuy').checked) {
+    series.push({
+      name: '买入', type: 'scatter', data: buyData, symbol: 'triangle', symbolSize: 10,
+      itemStyle: {color: '#f85149'}, label: {show: false}
+    });
+  }
+  if ($('showSell').checked) {
+    series.push({
+      name: '卖出', type: 'scatter', data: sellData, symbol: 'triangle', symbolRotate: 180, symbolSize: 10,
+      itemStyle: {color: '#3fb950'}, label: {show: false}
+    });
+  }
+  if ($('showStop').checked) {
+    series.push({
+      name: '止损', type: 'scatter', data: stopData, symbol: 'x', symbolSize: 10,
+      itemStyle: {color: '#bc8cff'}, label: {show: false}
+    });
+  }
+
+  chartSignal.setOption({
+    backgroundColor: 'transparent',
+    grid: { left: 60, right: 40, top: 30, bottom: 40 },
+    tooltip: {
+      trigger: 'axis', backgroundColor: '#161b22', borderColor: '#30363d', textStyle: {color: '#c9d1d9'},
+      formatter: params => {
+        const i = params[0].dataIndex;
+        let s = `<div style="font-weight:600;margin-bottom:4px">${dates[i]}</div>`;
+        s += `<div>收盘: <b>${closes[i].toFixed(2)}</b></div>`;
+        if (r.upperE[i]) s += `<div style="color:#f85149">上轨(N): ${r.upperE[i].toFixed(2)}</div>`;
+        if (r.lowerX[i]) s += `<div style="color:#3fb950">下轨(M): ${r.lowerX[i].toFixed(2)}</div>`;
+        if (r.atr[i]) s += `<div style="color:#8b949e">ATR: ${r.atr[i].toFixed(2)}</div>`;
+        return s;
+      }
+    },
+    legend: { show: false },
+    xAxis: { type: 'category', data: dates, axisLine: {lineStyle: {color: '#30363d'}},
+      axisLabel: {color: '#8b949e', fontSize: 11}, splitLine: {show: false} },
+    yAxis: { type: 'value', name: '价格', nameTextStyle: {color: '#8b949e'},
+      axisLine: {lineStyle: {color: '#30363d'}}, axisLabel: {color: '#8b949e', fontSize: 11},
+      splitLine: {lineStyle: {color: '#21262d'}} },
+    dataZoom: [{ type: 'inside', start: 0, end: 100 }, { type: 'slider', start: 0, end: 100, bottom: 5,
+      height: 20, borderColor: '#30363d', fillerColor: '#1f6feb33', textStyle: {color: '#8b949e'} }],
+    series: series
+  }, true);
+}
+
+// ======================== MAIN ========================
+async function doBacktest() {
+  errorBar.classList.remove('show');
+  loadingOverlay.classList.add('active');
+
+  try {
+    const code = stockSelect.value;
+    if (!code) throw new Error('请选择股票');
+    rawData = await fetchStockData(code);
+    if (rawData.length < 100) throw new Error('数据不足，请换一只');
+
+    backtestResult = runBacktest(rawData);
+    renderMetrics(backtestResult);
+    renderNetValue(backtestResult);
+    renderSignal(backtestResult);
+  } catch (err) {
+    errorBar.textContent = '错误: ' + err.message;
+    errorBar.classList.add('show');
+  } finally {
+    loadingOverlay.classList.remove('active');
+  }
+}
+
+// ======================== INIT ========================
+function init() {
+  chartNetValue = echarts.init($('chartNetValue'));
+  chartSignal = echarts.init($('chartSignal'));
+
+  runBtn.addEventListener('click', doBacktest);
+  resetBtn.addEventListener('click', () => {
+    presetBtns.forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-preset="classic"]').classList.add('active');
+    entryN.value = 20; exitM.value = 10; atrPeriod.value = 20; addCoeff.value = 5; maxUnits.value = 2;
+    sliders.forEach(s => s.el.dispatchEvent(new Event('input')));
+    initialCapital.value = 10;
+    feeToggle.checked = true; slipToggle.checked = true;
+  });
+
+  // Legend checkboxes
+  ['showStrategy','showFull','showEqual','showPrice','showUpper','showLower','showBuy','showSell','showStop']
+    .forEach(id => { if ($(id)) $(id).addEventListener('change', () => { if (backtestResult) { renderNetValue(backtestResult); renderSignal(backtestResult); }}); });
+
+  window.addEventListener('resize', () => { chartNetValue.resize(); chartSignal.resize(); });
+
+  // Auto-run on load with default stock
+  doBacktest();
+}
+
+init();
+</script>
+</body>
+</html>
